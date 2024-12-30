@@ -1,6 +1,6 @@
 window.addEventListener("load", addBookmarkButton);
-let data;
 let currentPathName = window.location.pathname;
+
 const observer = new MutationObserver(() => {
     addBookmarkButton();
     const newPathName = window.location.pathname;
@@ -19,8 +19,6 @@ addInjectScript();
 function onProblemsPage() {
     return window.location.pathname.startsWith("/problems/") && window.location.pathname.length > "/problems/".length;
 }
-
-// NORMAL CHATBOT HANDLER
 
 function addBookmarkButton() {
     // Ensure we are on the correct page and button doesn't already exist
@@ -65,11 +63,26 @@ function addBookmarkButton() {
 }
 
 // CHATBOT HANDLER AS A POPUP
-
 function openChatBotHandler() {
-    if (document.getElementById("chatbot-container")) return;
-    createChatBotPopup();
+    // Check if the API key is stored
+    chrome.storage.local.get("apiKey", (result) => {
+        const apiKey = result.apiKey;
+        if (!apiKey) {
+            chrome.runtime.sendMessage({ action: "openPopup" });
+        } else {
+            // Use the existing API key for the AI model
+            console.log("API Key already stored!");
+            // Continue with the AI functionality
+            if (document.getElementById("chatbot-container")) return;
+            createChatBotPopup();
+        }
+    });
 }
+
+// function openChatBotHandler() {
+//     if (document.getElementById("chatbot-container")) return;
+//     createChatBotPopup();
+// }
 
 function createChatBotPopup() {
     // Check if the chatbot already exists
@@ -161,8 +174,14 @@ function createChatBotPopup() {
     chatbotInput.addEventListener("blur", () => {
         chatbotInput.style.borderColor = "#ddd"; // Reset border color when out of focus
     });
+    chatbotInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+            document.getElementById("chat-send-btn").click();
+        }
+    });
 
     const chatbotSendButton = document.createElement("button");
+    chatbotSendButton.id = "chat-send-btn";
     chatbotSendButton.textContent = "Send";
     chatbotSendButton.style.marginLeft = "15px";
     chatbotSendButton.style.padding = "12px 20px";
@@ -206,7 +225,7 @@ function closeBtnHandler() {
 }
 
 async function sendBtnHandler(chatbotInput, chatbotMessages) {
-    const message = chatbotInput.value.trim();
+    let message = chatbotInput.value.trim();
     const uniqueId = extractUniqueId(window.location.href);
     if (message) {
         // Add user message
@@ -220,32 +239,31 @@ async function sendBtnHandler(chatbotInput, chatbotMessages) {
 
         // Clear input after sending
         chatbotInput.value = "";
-
         try {
             // Fetch AI response
             const response = await fetchAIResponse(message);
 
             // Add AI response
             if (response) {
-                addMessageToChat(chatbotMessages, response, "ai");
+                addMessageToChat(chatbotMessages, response, "model");
                 getMessagesFromLocalStorage(uniqueId, (messages) => {
-                    messages.push({ text: response, sender: "ai" });
+                    messages.push({ text: response, sender: "model" });
                     saveMessagesToLocalStorage(uniqueId, messages);
                 });
             } else {
                 const errorMsg = "Sorry, I couldn't fetch a response.";
-                addMessageToChat(chatbotMessages, errorMsg, "ai");
+                addMessageToChat(chatbotMessages, errorMsg, "model");
                 getMessagesFromLocalStorage(uniqueId, (messages) => {
-                    messages.push({ text: errorMsg, sender: "ai" });
+                    messages.push({ text: errorMsg, sender: "model" });
                     saveMessagesToLocalStorage(uniqueId, messages);
                 });
             }
         } catch (error) {
             console.error("Error fetching AI response:", error);
             const errorMsg = "An error occurred. Please try again later.";
-            addMessageToChat(chatbotMessages, errorMsg, "ai");
+            addMessageToChat(chatbotMessages, errorMsg, "model");
             getMessagesFromLocalStorage(uniqueId, (messages) => {
-                messages.push({ text: errorMsg, sender: "ai" });
+                messages.push({ text: errorMsg, sender: "model" });
                 saveMessagesToLocalStorage(uniqueId, messages);
             });
         }
@@ -283,7 +301,7 @@ function loadChatHistory(chatbotMessages) {
 // Helper function to add messages to the chat
 function addMessageToChat(chatbotMessages, text, sender) {
     const messageElement = document.createElement("div");
-    messageElement.textContent = text;
+    messageElement.innerHTML = text;
     messageElement.style.margin = "5px 0";
     messageElement.style.padding = "8px";
     messageElement.style.borderRadius = "5px";
@@ -291,7 +309,7 @@ function addMessageToChat(chatbotMessages, text, sender) {
     if (sender === "user") {
         messageElement.style.backgroundColor = "#e0f7fa";
         messageElement.style.alignSelf = "flex-end";
-    } else if (sender === "ai") {
+    } else if (sender === "model") {
         messageElement.style.backgroundColor = "#f1f1f1";
         messageElement.style.alignSelf = "flex-start";
     }
@@ -300,52 +318,185 @@ function addMessageToChat(chatbotMessages, text, sender) {
     chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
 }
 
-async function fetchAIResponse(message) {
-    const apiKey = "AIzaSyAsRwBL0qaVZckLnkKZeXDzWT9ki7NAyqg";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    const requestBody = {
-        contents: [
-            {
-                parts: [
-                    { text: message }
-                ]
+async function getApiKey() {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get("apiKey", (result) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+            } else {
+                resolve(result["apiKey"]);
             }
-        ]
-    };
-
-    try {
-        // Make the POST request
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(requestBody)
         });
+    });
+}
 
-        // Check if the response is OK
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status} - ${response.statusText}`);
+async function fetchAIResponse(message) {
+    const API_KEY = await getApiKey();
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    let promptSent = false;
+    const contents = [];
+    const uniqueId = extractUniqueId(window.location.href);
+
+    return new Promise((resolve, reject) => {
+        // Fetch intercepted data (this data contains problem details)
+        chrome.storage.local.get("interceptedData", (result) => {
+            const interceptedData = result["interceptedData"] || {}; // Renamed variable to avoid collision
+
+            // Fetch previous messages from chrome storage using uniqueId
+            chrome.storage.local.get([uniqueId], (result) => {
+                const messagesData = result[uniqueId]; // Renamed variable to avoid collision
+                if (messagesData) {
+                    // Iterate over the array of messages and add them to contents
+                    for (let i = 0; i < messagesData.length; i++) {
+                        promptSent = true;
+                        const text = messagesData[i].text;  // Get the message text
+                        const role = messagesData[i].sender;  // Get the sender's role ("user" or "model")
+
+                        // Check if this is the first user message, and if promptSent is true, add the prompt
+                        if (i === 0) {
+                            contents.push({
+                                role: "user",
+                                parts: [
+                                    { text: `
+                                        You are a helpful assistant tasked with solving a specific problem based on the provided details.
+
+                                        Problem Description: 
+                                        ${interceptedData.problemDescription}
+
+                                        Hints: 
+                                        1. ${interceptedData.hints?.hint1 || "No hint provided."}
+                                        2. ${interceptedData.hints?.hint2 || "No hint provided."}
+
+                                        Solution Approach:
+                                        ${interceptedData.solutionApproach}
+
+                                        Input Format:
+                                        ${interceptedData.inputFormat}
+
+                                        Output Format:
+                                        ${interceptedData.outputFormat}
+
+                                        Constraints:
+                                        ${interceptedData.constraints}
+
+                                        Notes:
+                                        - Always provide a user-friendly response.
+                                        - If the user asks a general question or greeting (e.g., "Hi"), acknowledge it warmly and guide the user to ask specific questions related to the problem.
+                                        - If no specific question is asked, politely prompt the user to provide one, explaining how it relates to the problem.
+
+                                        User Question: ${messagesData[i].text}
+                                    `}
+                                ]
+                            });
+                        } else {
+                            // Add the message to contents in the correct format
+                            contents.push({
+                                role: role,
+                                parts: [
+                                    { text: text }
+                                ]
+                            });
+                        }
+                    }
+                }
+                if (!promptSent) {
+                    message = `
+                        You are a helpful assistant tasked with solving a specific problem based on the provided details.
+
+                        Problem Description: 
+                        ${interceptedData.problemDescription}
+
+                        Hints: 
+                        1. ${interceptedData.hints?.hint1 || "No hint provided."}
+                        2. ${interceptedData.hints?.hint2 || "No hint provided."}
+
+                        Solution Approach:
+                        ${interceptedData.solutionApproach}
+
+                        Input Format:
+                        ${interceptedData.inputFormat}
+
+                        Output Format:
+                        ${interceptedData.outputFormat}
+
+                        Constraints:
+                        ${interceptedData.constraints}
+
+                        Notes:
+                        - Always provide a user-friendly response.
+                        - If the user asks a general question or greeting (e.g., "Hi"), acknowledge it warmly and guide the user to ask specific questions related to the problem.
+                        - If no specific question is asked, politely prompt the user to provide one, explaining how it relates to the problem.
+
+                        User Question: ${message}
+                    `;
+                }
+
+                // Add the final user message (with the problem details prompt) after all previous messages
+                contents.push({
+                    role: "user",
+                    parts: [
+                        { text: message }
+                    ]
+                });
+
+                // Construct the requestBody object
+                const requestBody = {
+                    contents: contents
+                };
+
+
+                // Make the POST request
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestBody)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(responseData => {
+                    let text = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) {
+                        text = formatResponseForUI(text);
+                        resolve(text);  // Resolve with AI response text
+                    } else {
+                        console.error("Response does not contain the expected text field.");
+                        reject("No AI response");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching AI response:", error);
+                    reject(error);
+                });
+            });
+        });
+    });
+}
+
+// Function to format response for better readability and code handling
+function formatResponseForUI(text) {
+    return text.replace(/```([\s\S]*?)```|`([^`]*)`/g, (match, multilineCode, inlineCode) => {
+        if (multilineCode) {
+            return `<pre class="code-block"><code>${escapeHTML(multilineCode)}</code></pre>`;
+        } else if (inlineCode) {
+            return `<code class="inline-code">${escapeHTML(inlineCode)}</code>`;
         }
+        return match;
+    });
+}
 
-        // Parse the JSON response
-        const responseData = await response.json();
-
-        // Extract the "text" field from the JSON
-        const text = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (text) {
-            console.log("AI Response:", text);
-            return text;
-        } else {
-            console.error("Response does not contain the expected text field.");
-            return null;
-        }
-    } catch (error) {
-        console.error("Error fetching AI response:", error);
-        return null;
-    }
+// Helper function to escape HTML characters
+function escapeHTML(html) {
+    return html.replace(/&/g, "&amp;")
+               .replace(/</g, "&lt;")
+               .replace(/>/g, "&gt;")
+               .replace(/"/g, "&quot;")
+               .replace(/'/g, "&#039;");
 }
 
 function addInjectScript() {
@@ -358,6 +509,25 @@ function addInjectScript() {
 }
 
 document.addEventListener("xhrIntercept", (event) => {
-    data = event.detail; // Contains the intercepted request details
-    console.log("Intercepted XHR:", data);
+    const data = JSON.parse(event.detail.response).data;  // Intercepted data from XHR
+    // Store the intercepted data for use in chatbot (excluding body for chat)
+    const relevantData = {
+        problemDescription: data.body,
+        hints: {hint1: data.hints.hint1, hint2: data.hints.hint2}, // Store hints, solution approach, etc.
+        solutionApproach: data.hints.solution_approach,
+        inputFormat: data.input_format,
+        outputFormat: data.output_format,
+        constraints: data.constraints
+    };
+    chrome.storage.local.set({ "interceptedData" : relevantData }, () => {
+        console.log("Intercepted data stored.");
+    });
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "openChatBot") {
+        console.log("Received message to open chatbot");
+        openChatBotHandler();
+        sendResponse({ status: "Chatbot opened successfully" });
+    }
 });

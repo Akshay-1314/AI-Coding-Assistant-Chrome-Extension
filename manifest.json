@@ -1,18 +1,20 @@
 {
   "manifest_version": 3,
   "name": "AZ_AI_CHAT_BOT",
-  "version": "0.1",
+  "version": "1.0",
   "author": "Akshay Kumar Malathkar",
   "description": "An AI_CHAT_BOT chrome extension that helps the user with problem queries on maang.in website",
   "permissions": [
     "storage",
-    "tabs"
+    "tabs",
+    "activeTab"
   ],
   "content_scripts": [
     {
       "matches": [
         "https://maang.in/*"
       ],
+      "css": ["style.css"],
       "js": [
         "content.js"
       ]
@@ -37,6 +39,7 @@
       "24": "assets/ext-icon.png",
       "32": "assets/ext-icon.png"
     },
+    
     "default_popup": "popup.html",
     "default_title": "AZ_AI_CHAT_BOT"
   }
