@@ -3,7 +3,7 @@
   "name": "AZ_AI_CHAT_BOT",
   "version": "1.0",
   "author": "Akshay Kumar Malathkar",
-  "description": "An AI_CHAT_BOT chrome extension that helps the user with problem queries on maang.in website",
+  "description": "This Chrome extension is designed to provide AI assistance for solving coding problems directly within the browser. It uses the Google Gemini AI model to offer guidance, solutions, and code examples. The extension integrates with a website hosting coding problems, allowing users to easily get help via a chatbot interface.",
   "permissions": [
     "storage",
     "tabs",
@@ -26,8 +26,6 @@
   "web_accessible_resources" : [
     {
       "resources": [
-        "assets/delete.png",
-        "assets/play.png",
         "inject.js"
       ],
       "matches" : ["<all_urls>"]
