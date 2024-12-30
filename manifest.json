@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "AZ Problem Tracker",
+  "name": "AZ_AI_CHAT_BOT",
   "version": "0.1",
-  "author": "Lakshya Mittal",
-  "description": "A Chrome Extension that helps us track problems on AZ",
+  "author": "Akshay Kumar Malathkar",
+  "description": "An AI_CHAT_BOT chrome extension that helps the user with problem queries on maang.in website",
   "permissions": [
     "storage",
     "tabs"
@@ -24,9 +24,9 @@
   "web_accessible_resources" : [
     {
       "resources": [
-        "assets/bookmark.png",
         "assets/delete.png",
-        "assets/play.png"
+        "assets/play.png",
+        "inject.js"
       ],
       "matches" : ["<all_urls>"]
     }
@@ -38,6 +38,6 @@
       "32": "assets/ext-icon.png"
     },
     "default_popup": "popup.html",
-    "default_title": "AZ Problem Tracker"
+    "default_title": "AZ_AI_CHAT_BOT"
   }
 }
