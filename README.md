@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 # Chrome-Extension-Base-Template
 This is a basic Chrome Extension base template for starting new projects off of initialized with a MIT license.
 
@@ -41,4 +39,3 @@ First Last
 
 ## License
 Please refer to LICENSE file.
->>>>>>> d0c6927 (Done with MVP creation)
