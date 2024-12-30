@@ -35,8 +35,9 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 
 ### Set the API Key
 
-1. After installing the extension, click the extension icon in your browser.
-2. Enter your API key in the popup to enable the AI model.
+1. After installing the extension, click on the **AI Help** icon on viewing the coding problem page in your browser.
+2. A popup to enter your API key will appear.
+3. Enter your API key in the popup to enable the AI model.
 3. The popup will automatically close, and the chatbot will be ready for use.
 
 ### Open AI Help
@@ -47,7 +48,7 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 ### Interacting with the Chatbot
 
 - Ask specific questions or provide input related to the problem. The AI will respond accordingly.
-- The AI can answer both general and problem-specific queries.
+- The AI will act as a helpful assistant tasked with providing guidance on problem-specific queries.
 
 ---
 
