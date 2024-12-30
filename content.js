@@ -149,6 +149,61 @@ function createChatBotPopup() {
     chatbotMessages.style.fontSize = "14px";
     chatbotMessages.style.lineHeight = "1.6";
 
+    // Add a modern "Clear Chat History" button as an icon
+    const clearHistoryButton = document.createElement("span");
+    clearHistoryButton.id = "clear-history-btn";
+    clearHistoryButton.title = "Clear Chat History"; // Tooltip
+    clearHistoryButton.innerHTML = "🗑"; // Trash bin emoji
+    clearHistoryButton.style.position = "absolute";
+    clearHistoryButton.style.top = "15px";
+    clearHistoryButton.style.left = "15px"; // Positioned next to the close button
+    clearHistoryButton.style.fontSize = "20px";
+    clearHistoryButton.style.cursor = "pointer";
+    clearHistoryButton.style.color = "white";
+    clearHistoryButton.style.transition = "color 0.3s ease, transform 0.3s ease";
+    clearHistoryButton.style.display = "flex";
+    clearHistoryButton.style.alignItems = "center";
+    clearHistoryButton.style.justifyContent = "center";
+
+    // Add hover effects for better interactivity
+    clearHistoryButton.addEventListener("mouseenter", () => {
+        clearHistoryButton.style.color = "#ff1744"; // Red color on hover
+        clearHistoryButton.style.transform = "scale(1.1)"; // Slight zoom effect
+    });
+    clearHistoryButton.addEventListener("mouseleave", () => {
+        clearHistoryButton.style.color = "white"; // Reset color
+        clearHistoryButton.style.transform = "scale(1)"; // Reset zoom
+    });
+
+    const uniqueId = extractUniqueId(window.location.href);
+    // Add click handler to clear chat history with UI feedback
+    clearHistoryButton.addEventListener("click", () => {
+        chrome.storage.local.remove(uniqueId, () => {
+            console.log("Chat history cleared.");
+        });
+        const chatbotMsgArea = document.getElementById("chatbot-messages");
+
+        // Add fade-out effect to all messages
+        const messages = chatbotMsgArea.children;
+        Array.from(messages).forEach((msg, index) => {
+            msg.style.transition = "opacity 0.5s ease";
+            msg.style.opacity = "0";
+            setTimeout(() => {
+                msg.remove(); // Remove messages after fade-out
+            }, 500);
+        });
+
+        // Update clear button temporarily to show clearing feedback
+        clearHistoryButton.innerHTML = "⏳ Clearing...";
+        clearHistoryButton.style.cursor = "default";
+        setTimeout(() => {
+            clearHistoryButton.innerHTML = "🗑"; // Reset icon
+            clearHistoryButton.style.cursor = "pointer";
+            console.log("Chat history cleared.");
+        }, 1000);
+    });
+    chatbotHeader.appendChild(clearHistoryButton);
+
     // Create the chatbot input area
     const chatbotInputArea = document.createElement("div");
     chatbotInputArea.style.display = "flex";
@@ -358,7 +413,7 @@ async function fetchAIResponse(message) {
                                 role: "user",
                                 parts: [
                                     { text: `
-                                        You are a helpful assistant tasked with solving a specific problem based on the provided details.
+                                    You are a helpful assistant tasked with solving a specific problem based on the provided details. You should only provide responses directly related to the problem description, constraints, input/output formats, and coding concepts required to solve the problem. Ignore any unrelated questions or topics. If a user asks a question outside the scope of the problem, politely remind them to stay focused on the problem at hand.
 
                                         Problem Description: 
                                         ${interceptedData.problemDescription}
@@ -380,9 +435,9 @@ async function fetchAIResponse(message) {
                                         ${interceptedData.constraints}
 
                                         Notes:
-                                        - Always provide a user-friendly response.
-                                        - If the user asks a general question or greeting (e.g., "Hi"), acknowledge it warmly and guide the user to ask specific questions related to the problem.
+                                        - If the user asks a question related to problem or greet (e.g., "Hi"), acknowledge it warmly and guide the user to ask specific questions related to the problem.
                                         - If no specific question is asked, politely prompt the user to provide one, explaining how it relates to the problem.
+                                        - Do not provide responses to questions which are unrelated to the current problem
 
                                         User Question: ${messagesData[i].text}
                                     `}
@@ -401,7 +456,7 @@ async function fetchAIResponse(message) {
                 }
                 if (!promptSent) {
                     message = `
-                        You are a helpful assistant tasked with solving a specific problem based on the provided details.
+                        You are a helpful assistant tasked with solving a specific problem based on the provided details. You should only provide responses directly related to the problem description, constraints, input/output formats, and coding concepts required to solve the problem. Ignore any unrelated questions or topics. If a user asks a question outside the scope of the problem, politely remind them to stay focused on the problem at hand.
 
                         Problem Description: 
                         ${interceptedData.problemDescription}
@@ -423,9 +478,9 @@ async function fetchAIResponse(message) {
                         ${interceptedData.constraints}
 
                         Notes:
-                        - Always provide a user-friendly response.
-                        - If the user asks a general question or greeting (e.g., "Hi"), acknowledge it warmly and guide the user to ask specific questions related to the problem.
+                        - If the user asks a question related to problem or greet (e.g., "Hi"), acknowledge it warmly and guide the user to ask specific questions related to the problem.
                         - If no specific question is asked, politely prompt the user to provide one, explaining how it relates to the problem.
+                        - Do not provide responses to questions which are unrelated to the current problem
 
                         User Question: ${message}
                     `;

@@ -10,6 +10,7 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 - **Custom API Key**: Users enter their API key for the AI model via the extension's popup interface. Once entered, the chatbot fetches AI responses using this key.
 - **User-friendly UI**: Sleek, modern, and responsive popup and chatbot interfaces with pleasant user interactions.
 - **Message History**: Chat history is saved and used to provide contextual information to the AI model.
+- **Clear Chat History**: A dedicated button to clear the chat history directly from the chatbot interface, with smooth UI feedback to confirm the action.
 - **Input/Output Formatting**: Collects information from the page, including problem descriptions, hints, input/output formats, and constraints, and sends it to the AI for processing.
 
 ---
@@ -38,7 +39,7 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 1. After installing the extension, click on the **AI Help** icon on viewing the coding problem page in your browser.
 2. A popup to enter your API key will appear.
 3. Enter your API key in the popup to enable the AI model.
-3. The popup will automatically close, and the chatbot will be ready for use.
+4. The popup will automatically close, and the chatbot will be ready for use.
 
 ### Open AI Help
 
@@ -49,6 +50,11 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 
 - Ask specific questions or provide input related to the problem. The AI will respond accordingly.
 - The AI will act as a helpful assistant tasked with providing guidance on problem-specific queries.
+
+### Clear Chat History
+
+- Click the **Clear History** button in the chatbot header to delete all past messages.
+- A smooth animation and UI feedback will confirm that the chat history has been cleared successfully.
 
 ---
 
@@ -66,10 +72,10 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 - Saves the API key to `chrome.storage.local` for future use.
 - Automatically enables the chatbot after the key is entered.
 
-### Popup UI
+### Chatbot UI
 
-- Modern, responsive, and user-friendly interface for entering the API key.
-- Automatically closes after the key is entered.
+- Modern, responsive, and user-friendly interface.
+- Features a **Clear History** button for resetting the chat, ensuring a clutter-free experience.
 
 ### Message Passing
 
