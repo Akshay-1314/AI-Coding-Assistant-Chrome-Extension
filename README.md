@@ -13,6 +13,7 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 - **Clear Chat History**: A dedicated button to clear the chat history directly from the chatbot interface, with smooth UI feedback to confirm the action.
 - **Input/Output Formatting**: Collects information from the page, including problem descriptions, hints, input/output formats, and constraints, and sends it to the AI for processing.
 - **User's Code as Context**: The user's current code, based on the selected language, is included in the prompt sent to the AI to provide relevant code-specific context and suggestions.
+- **Theme Change**: The chatbot's theme can now be dynamically changed based on the selected page theme. This feature allows the extension to match the look and feel of the host website by adjusting the UI colors (container background, header, buttons, etc.) based on the active theme.
 
 ---
 
@@ -37,7 +38,7 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 
 ### Set the API Key
 
-1. After installing the extension, click on the **AI Help** icon on viewing the coding problem page in your browser.
+1. After installing the extension, click on the **AI Help** icon while viewing the coding problem page in your browser.
 2. A popup to enter your API key will appear.
 3. Enter your API key in the popup to enable the AI model.
 4. The popup will automatically close, and the chatbot will be ready for use.
@@ -56,6 +57,11 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 
 - Click the **Clear History** button in the chatbot header to delete all past messages.
 - A smooth animation and UI feedback will confirm that the chat history has been cleared successfully.
+
+### Theme Change
+
+- The chatbot interface will automatically match the theme of the hosting page. When the page theme is updated (such as through a theme switcher), the chatbot’s appearance will change accordingly.
+- The theme color adjustments include background colors, button styles, text color, and more, ensuring the chatbot aligns with the site's overall design.
 
 ---
 
@@ -77,6 +83,7 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 
 - Modern, responsive, and user-friendly interface.
 - Features a **Clear History** button for resetting the chat, ensuring a clutter-free experience.
+- **Dynamic Theme Switching**: The chatbot theme can change based on the active theme of the page being viewed.
 
 ### Message Passing
 
