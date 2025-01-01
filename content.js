@@ -396,10 +396,12 @@ async function fetchAIResponse(message) {
         // Fetch intercepted data (this data contains problem details)
         chrome.storage.local.get("interceptedData", (result) => {
             const interceptedData = result["interceptedData"] || {}; // Renamed variable to avoid collision
-
             // Fetch previous messages from chrome storage using uniqueId
             chrome.storage.local.get([uniqueId], (result) => {
                 const messagesData = result[uniqueId]; // Renamed variable to avoid collision
+                // Fetch code editor details
+                const editorLanguage = localStorage.getItem("editor-language").replace(/"/g, '');
+                const usersCode = getUsersCode();
                 if (messagesData) {
                     // Iterate over the array of messages and add them to contents
                     for (let i = 0; i < messagesData.length; i++) {
@@ -412,8 +414,7 @@ async function fetchAIResponse(message) {
                             contents.push({
                                 role: "user",
                                 parts: [
-                                    { text: `
-                                    You are a helpful assistant tasked with solving a specific problem based on the provided details. You should only provide responses directly related to the problem description, constraints, input/output formats, and coding concepts required to solve the problem. Ignore any unrelated questions or topics. If a user asks a question outside the scope of the problem, politely remind them to stay focused on the problem at hand.
+                                    { text: `You are a helpful assistant tasked with solving a specific problem based on the provided details. You should only provide responses directly related to the problem description, constraints, input/output formats, the user's current coding context provided as code editor details and coding concepts required to solve the problem. Ignore any unrelated questions or topics. If a user asks a question outside the scope of the problem, politely remind them to stay focused on the problem at hand.
 
                                         Problem Description: 
                                         ${interceptedData.problemDescription}
@@ -434,9 +435,17 @@ async function fetchAIResponse(message) {
                                         Constraints:
                                         ${interceptedData.constraints}
 
+                                        User's Current Code:
+                                        ${usersCode[editorLanguage] ? `
+                                        Language: ${editorLanguage}
+                                        Code:
+                                        ${usersCode[editorLanguage] || "No code found."}
+                                        ` : "No code found for the selected language."}
+
                                         Notes:
                                         - If the user asks a question related to problem or greet (e.g., "Hi"), acknowledge it warmly and guide the user to ask specific questions related to the problem.
                                         - If no specific question is asked, politely prompt the user to provide one, explaining how it relates to the problem.
+                                        - Use the provided users code context to tailor suggestions or debugging tips.
                                         - Do not provide responses to questions which are unrelated to the current problem
 
                                         User Question: ${messagesData[i].text}
@@ -455,9 +464,8 @@ async function fetchAIResponse(message) {
                     }
                 }
                 if (!promptSent) {
-                    message = `
-                        You are a helpful assistant tasked with solving a specific problem based on the provided details. You should only provide responses directly related to the problem description, constraints, input/output formats, and coding concepts required to solve the problem. Ignore any unrelated questions or topics. If a user asks a question outside the scope of the problem, politely remind them to stay focused on the problem at hand.
-
+                    message = `You are a helpful assistant tasked with solving a specific problem based on the provided details. You should only provide responses directly related to the problem description, constraints, input/output formats, the user's current coding context provided as User's Code and coding concepts required to solve the problem. Ignore any unrelated questions or topics. If a user asks a question outside the scope of the problem, politely remind them to stay focused on the problem at hand.
+                    
                         Problem Description: 
                         ${interceptedData.problemDescription}
 
@@ -477,9 +485,17 @@ async function fetchAIResponse(message) {
                         Constraints:
                         ${interceptedData.constraints}
 
+                        User's Current Code:
+                        ${usersCode[editorLanguage] ? `
+                        Language: ${editorLanguage}
+                        Code:
+                        ${usersCode[editorLanguage] || "No code found."}
+                        ` : "No code found for the selected language."}
+
                         Notes:
                         - If the user asks a question related to problem or greet (e.g., "Hi"), acknowledge it warmly and guide the user to ask specific questions related to the problem.
                         - If no specific question is asked, politely prompt the user to provide one, explaining how it relates to the problem.
+                        - Use the provided users code context to tailor suggestions or debugging tips.
                         - Do not provide responses to questions which are unrelated to the current problem
 
                         User Question: ${message}
@@ -493,12 +509,11 @@ async function fetchAIResponse(message) {
                         { text: message }
                     ]
                 });
-
+                
                 // Construct the requestBody object
                 const requestBody = {
                     contents: contents
                 };
-
 
                 // Make the POST request
                 fetch(url, {
@@ -561,6 +576,37 @@ function addInjectScript() {
         this.remove(); // Remove script after execution
     };
     document.documentElement.appendChild(script);
+}
+
+function getUsersCode() {
+    // Check if the profileID exists in the localStorage of the browser
+        // Iterate over all items in the localStorage
+    const uniqueId = extractUniqueId(window.location.href);
+    const codeEntries = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+
+        // Check if the value contains the profileID (assuming profileID is part of the stored data)
+        if (key && key.includes(uniqueId)) {
+            // Extract the language from the key (e.g., "course_10634_337_Java")
+            const match = key.match(/_(C(?:\+\+)?(?:\d+)?|Java|Python(?:\d+)?)/); // Matches C, C++, C++14, Java, Python3
+            const language = match ? match[1] : "Unknown";
+            try {
+                // Attempt to parse the value as JSON (if applicable)
+                const codeContent = JSON.parse(value);
+                codeEntries[language] = codeContent; // Add the parsed content
+            } catch (e) {
+                // If parsing fails, return the raw value
+                codeEntries[language] = value;
+            }
+        }
+    }
+    if (Object.keys(codeEntries).length === 0) {
+        console.warn(`No matching localStorage entries found for unique ID: ${uniqueId}`);
+        return null;
+    }
+    return codeEntries;
 }
 
 document.addEventListener("xhrIntercept", (event) => {
