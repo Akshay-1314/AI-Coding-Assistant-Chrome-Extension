@@ -12,6 +12,7 @@ This Chrome extension is designed to provide AI assistance for solving coding pr
 - **Message History**: Chat history is saved and used to provide contextual information to the AI model.
 - **Clear Chat History**: A dedicated button to clear the chat history directly from the chatbot interface, with smooth UI feedback to confirm the action.
 - **Input/Output Formatting**: Collects information from the page, including problem descriptions, hints, input/output formats, and constraints, and sends it to the AI for processing.
+- **User's Code as Context**: The user's current code, based on the selected language, is included in the prompt sent to the AI to provide relevant code-specific context and suggestions.
 
 ---
 
