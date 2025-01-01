@@ -1,8 +1,36 @@
 window.addEventListener("load", addBookmarkButton);
 let currentPathName = window.location.pathname;
+let currTheme = localStorage.getItem("playlist-page-theme").replace(/"/g, '');
+const themeStyles = {
+    light: {
+        containerBg: "#ffffff",
+        messagesBg: "#f3f4f6",
+        inputAreaBg: "#fafafa",
+        borderColor: "#ddd",
+        headerBg: "linear-gradient(135deg, #3f6fc1, #65aefc)",
+        textColor: "white",
+        buttonBg: "#3f6fc1",
+        buttonHoverBg: "#2d4f91",
+        closeHoverColor: "#ff1744",
+        clearHoverColor: "#ff1744",
+    },
+    dark: {
+        containerBg: "#1e1e2e",
+        messagesBg: "#2c2c3b",
+        inputAreaBg: "#2c2c3b",
+        borderColor: "#444",
+        headerBg: "linear-gradient(135deg, #444, #555)",
+        textColor: "white",
+        buttonBg: "#4c4c6f",
+        buttonHoverBg: "#363654",
+        closeHoverColor: "#ff7f7f",
+        clearHoverColor: "#ff7f7f",
+    },
+};
 
 const observer = new MutationObserver(() => {
     addBookmarkButton();
+    checkThemeChange();
     const newPathName = window.location.pathname;
     if (currentPathName !== newPathName) {
         currentPathName = newPathName;
@@ -15,6 +43,7 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 addBookmarkButton();
 addInjectScript();
+checkThemeChange();
 
 function onProblemsPage() {
     return window.location.pathname.startsWith("/problems/") && window.location.pathname.length > "/problems/".length;
@@ -73,16 +102,48 @@ function openChatBotHandler() {
             // Use the existing API key for the AI model
             console.log("API Key already stored!");
             // Continue with the AI functionality
-            if (document.getElementById("chatbot-container")) return;
             createChatBotPopup();
         }
     });
 }
 
-// function openChatBotHandler() {
-//     if (document.getElementById("chatbot-container")) return;
-//     createChatBotPopup();
-// }
+function changeChatBotTheme() {
+    // Check if chatbot is open or not
+    if (!document.getElementById("chatbot-container")) return;
+
+    const chatbotContainer = document.getElementById("chatbot-container");
+    const chatbotHeader = chatbotContainer.querySelector("div:first-child");
+    const chatbotMessages = document.getElementById("chatbot-messages");
+    const chatbotInputArea = document.getElementById("chatbot-input-area");
+    const closeButton = document.getElementById("chatbot-close-btn");
+    const clearHistoryButton = document.getElementById("clear-history-btn");
+    const chatbotSendButton = document.getElementById("chat-send-btn");
+
+    chatbotContainer.style.backgroundColor = themeStyles[currTheme].containerBg;
+    chatbotHeader.style.background = themeStyles[currTheme].headerBg;
+    chatbotHeader.style.color = themeStyles[currTheme].textColor;
+    closeButton.style.color = themeStyles[currTheme].textColor; 
+    chatbotMessages.style.backgroundColor = themeStyles[currTheme].messagesBg;
+    clearHistoryButton.style.color = themeStyles[currTheme].textColor;
+    chatbotInputArea.style.backgroundColor = themeStyles[currTheme].inputAreaBg;
+    chatbotSendButton.style.backgroundColor = themeStyles[currTheme].buttonBg;
+    chatbotSendButton.style.color = themeStyles[currTheme].textColor;
+}
+
+function checkThemeChange() {
+    const themeToggle = document.querySelector(".ant_switch_resource_header button");
+    if (themeToggle) {
+        themeToggle.addEventListener("click", () => {
+            setTimeout(() => {
+                const updatedTheme = localStorage.getItem("playlist-page-theme").replace(/"/g, '');
+                if (updatedTheme !== currTheme) {
+                    currTheme = updatedTheme || "light"; // Default to 'light' if null
+                    changeChatBotTheme();
+                }
+            }, 100); // Update after 100ms to ensure state has updated in localStorage
+        });
+    }
+}
 
 function createChatBotPopup() {
     // Check if the chatbot already exists
@@ -96,7 +157,7 @@ function createChatBotPopup() {
     chatbotContainer.style.right = "20px";
     chatbotContainer.style.width = "400px";
     chatbotContainer.style.height = "500px";
-    chatbotContainer.style.backgroundColor = "#ffffff";
+    chatbotContainer.style.backgroundColor = themeStyles[currTheme].containerBg;
     chatbotContainer.style.borderRadius = "16px";
     chatbotContainer.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.2)";
     chatbotContainer.style.overflow = "hidden";
@@ -109,8 +170,8 @@ function createChatBotPopup() {
     // Create the chatbot header
     const chatbotHeader = document.createElement("div");
     chatbotHeader.textContent = "Chat with AI";
-    chatbotHeader.style.background = "linear-gradient(135deg, #3f6fc1, #65aefc)";
-    chatbotHeader.style.color = "white";
+    chatbotHeader.style.background = themeStyles[currTheme].headerBg;
+    chatbotHeader.style.color = themeStyles[currTheme].textColor;
     chatbotHeader.style.padding = "15px";
     chatbotHeader.style.textAlign = "center";
     chatbotHeader.style.fontSize = "20px";
@@ -122,19 +183,20 @@ function createChatBotPopup() {
     // Add a close button to the header
     const closeButton = document.createElement("span");
     closeButton.textContent = "×";
+    closeButton.id = "chatbot-close-btn";
     closeButton.style.fontSize = "25px";
     closeButton.style.cursor = "pointer";
     closeButton.style.position = "absolute";
     closeButton.style.top = "12px";
     closeButton.style.right = "15px";
-    closeButton.style.color = "white";
+    closeButton.style.color = themeStyles[currTheme].textColor;
     closeButton.style.transition = "color 0.3s ease";
     closeButton.addEventListener("click", closeBtnHandler);
     closeButton.addEventListener("mouseenter", () => {
-        closeButton.style.color = "#ff1744";
+        closeButton.style.color = themeStyles[currTheme].closeHoverColor;
     });
     closeButton.addEventListener("mouseleave", () => {
-        closeButton.style.color = "white";
+        closeButton.style.color = themeStyles[currTheme].textColor;
     });
     chatbotHeader.appendChild(closeButton);
 
@@ -144,7 +206,7 @@ function createChatBotPopup() {
     chatbotMessages.style.flex = "1";
     chatbotMessages.style.padding = "15px";
     chatbotMessages.style.overflowY = "auto";
-    chatbotMessages.style.backgroundColor = "#f3f4f6";
+    chatbotMessages.style.backgroundColor = themeStyles[currTheme].messagesBg;
     chatbotMessages.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
     chatbotMessages.style.fontSize = "14px";
     chatbotMessages.style.lineHeight = "1.6";
@@ -159,7 +221,7 @@ function createChatBotPopup() {
     clearHistoryButton.style.left = "15px"; // Positioned next to the close button
     clearHistoryButton.style.fontSize = "20px";
     clearHistoryButton.style.cursor = "pointer";
-    clearHistoryButton.style.color = "white";
+    clearHistoryButton.style.color = themeStyles[currTheme].textColor;
     clearHistoryButton.style.transition = "color 0.3s ease, transform 0.3s ease";
     clearHistoryButton.style.display = "flex";
     clearHistoryButton.style.alignItems = "center";
@@ -167,11 +229,11 @@ function createChatBotPopup() {
 
     // Add hover effects for better interactivity
     clearHistoryButton.addEventListener("mouseenter", () => {
-        clearHistoryButton.style.color = "#ff1744"; // Red color on hover
+        clearHistoryButton.style.color = themeStyles[currTheme].clearHoverColor;
         clearHistoryButton.style.transform = "scale(1.1)"; // Slight zoom effect
     });
     clearHistoryButton.addEventListener("mouseleave", () => {
-        clearHistoryButton.style.color = "white"; // Reset color
+        clearHistoryButton.style.color = themeStyles[currTheme].textColor;
         clearHistoryButton.style.transform = "scale(1)"; // Reset zoom
     });
 
@@ -206,9 +268,10 @@ function createChatBotPopup() {
 
     // Create the chatbot input area
     const chatbotInputArea = document.createElement("div");
+    chatbotInputArea.id = "chatbot-input-area";
     chatbotInputArea.style.display = "flex";
     chatbotInputArea.style.padding = "15px";
-    chatbotInputArea.style.backgroundColor = "#fafafa";
+    chatbotInputArea.style.backgroundColor = themeStyles[currTheme].inputAreaBg;
     chatbotInputArea.style.borderBottom = "1px solid #ddd";
     chatbotInputArea.style.borderRadius = "0 0 16px 16px";
     chatbotInputArea.style.justifyContent = "space-between";
@@ -224,10 +287,10 @@ function createChatBotPopup() {
     chatbotInput.style.outline = "none";
     chatbotInput.style.transition = "border-color 0.3s ease";
     chatbotInput.addEventListener("focus", () => {
-        chatbotInput.style.borderColor = "#3f6fc1"; // Blue border on focus
+        chatbotInput.style.borderColor = themeStyles[currTheme].headerBg;
     });
     chatbotInput.addEventListener("blur", () => {
-        chatbotInput.style.borderColor = "#ddd"; // Reset border color when out of focus
+        chatbotInput.style.borderColor = themeStyles[currTheme].borderColor;
     });
     chatbotInput.addEventListener("keypress", (event) => {
         if (event.key === "Enter") {
@@ -240,8 +303,8 @@ function createChatBotPopup() {
     chatbotSendButton.textContent = "Send";
     chatbotSendButton.style.marginLeft = "15px";
     chatbotSendButton.style.padding = "12px 20px";
-    chatbotSendButton.style.backgroundColor = "#3f6fc1";
-    chatbotSendButton.style.color = "white";
+    chatbotSendButton.style.backgroundColor = themeStyles[currTheme].buttonBg;
+    chatbotSendButton.style.color = themeStyles[currTheme].textColor;
     chatbotSendButton.style.border = "none";
     chatbotSendButton.style.borderRadius = "8px";
     chatbotSendButton.style.fontSize = "14px";
@@ -250,11 +313,11 @@ function createChatBotPopup() {
     chatbotSendButton.addEventListener("click", () => sendBtnHandler(chatbotInput, chatbotMessages));
 
     chatbotSendButton.addEventListener("mouseenter", () => {
-        chatbotSendButton.style.backgroundColor = "#2d4f91"; // Darker shade on hover
+        chatbotSendButton.style.backgroundColor = themeStyles[currTheme].buttonHoverBg;
     });
 
     chatbotSendButton.addEventListener("mouseleave", () => {
-        chatbotSendButton.style.backgroundColor = "#3f6fc1"; // Reset color
+        chatbotSendButton.style.backgroundColor = themeStyles[currTheme].buttonBg;
     });
 
     chatbotInputArea.appendChild(chatbotInput);
@@ -437,9 +500,9 @@ async function fetchAIResponse(message) {
 
                                         User's Current Code:
                                         ${usersCode[editorLanguage] ? `
-                                        Language: ${editorLanguage}
-                                        Code:
+                                        \`\`\`${editorLanguage}
                                         ${usersCode[editorLanguage] || "No code found."}
+                                        \`\`\`
                                         ` : "No code found for the selected language."}
 
                                         Notes:
@@ -487,9 +550,9 @@ async function fetchAIResponse(message) {
 
                         User's Current Code:
                         ${usersCode[editorLanguage] ? `
-                        Language: ${editorLanguage}
-                        Code:
+                        \`\`\`${editorLanguage}
                         ${usersCode[editorLanguage] || "No code found."}
+                        \`\`\`
                         ` : "No code found for the selected language."}
 
                         Notes:
@@ -557,7 +620,8 @@ function formatResponseForUI(text) {
             return `<code class="inline-code">${escapeHTML(inlineCode)}</code>`;
         }
         return match;
-    });
+    }).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold markdown support
+      .replace(/\*(.*?)\*/g, '<em>$1</em>');  // Italic markdown support
 }
 
 // Helper function to escape HTML characters
