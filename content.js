@@ -240,29 +240,33 @@ function createChatBotPopup() {
     const uniqueId = extractUniqueId(window.location.href);
     // Add click handler to clear chat history with UI feedback
     clearHistoryButton.addEventListener("click", () => {
-        chrome.storage.local.remove(uniqueId, () => {
-            console.log("Chat history cleared.");
-        });
-        const chatbotMsgArea = document.getElementById("chatbot-messages");
-
-        // Add fade-out effect to all messages
-        const messages = chatbotMsgArea.children;
-        Array.from(messages).forEach((msg, index) => {
-            msg.style.transition = "opacity 0.5s ease";
-            msg.style.opacity = "0";
+        chrome.storage.local.get(uniqueId, (obj) => {
+            if (Object.keys(obj).length == 0)
+                return;
+            chrome.storage.local.remove(uniqueId, () => {
+                console.log("Chat history cleared.");
+            });
+            const chatbotMsgArea = document.getElementById("chatbot-messages");
+    
+            // Add fade-out effect to all messages
+            const messages = chatbotMsgArea.children;
+            Array.from(messages).forEach((msg) => {
+                isMsgPresent = true;
+                msg.style.transition = "opacity 0.5s ease";
+                msg.style.opacity = "0";
+                setTimeout(() => {
+                    msg.remove(); // Remove messages after fade-out
+                }, 500);
+            });
+            // Update clear button temporarily to show clearing feedback
+            clearHistoryButton.innerHTML = "⏳ Clearing...";
+            clearHistoryButton.style.cursor = "default";
             setTimeout(() => {
-                msg.remove(); // Remove messages after fade-out
-            }, 500);
-        });
-
-        // Update clear button temporarily to show clearing feedback
-        clearHistoryButton.innerHTML = "⏳ Clearing...";
-        clearHistoryButton.style.cursor = "default";
-        setTimeout(() => {
-            clearHistoryButton.innerHTML = "🗑"; // Reset icon
-            clearHistoryButton.style.cursor = "pointer";
-            console.log("Chat history cleared.");
-        }, 1000);
+                clearHistoryButton.innerHTML = "🗑"; // Reset icon
+                clearHistoryButton.style.cursor = "pointer";
+                console.log("Chat history cleared.");
+            }, 1000);
+        })
     });
     chatbotHeader.appendChild(clearHistoryButton);
 
@@ -463,7 +467,7 @@ async function fetchAIResponse(message) {
             chrome.storage.local.get([uniqueId], (result) => {
                 const messagesData = result[uniqueId]; // Renamed variable to avoid collision
                 // Fetch code editor details
-                const editorLanguage = localStorage.getItem("editor-language").replace(/"/g, '');
+                const editorLanguage = localStorage.getItem("editor-language")?.replace(/"/g, '') || "C++14";
                 const usersCode = getUsersCode();
                 if (messagesData) {
                     // Iterate over the array of messages and add them to contents
