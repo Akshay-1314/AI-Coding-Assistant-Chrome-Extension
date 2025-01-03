@@ -1,6 +1,6 @@
 window.addEventListener("load", addBookmarkButton);
 let currentPathName = window.location.pathname;
-let currTheme = localStorage.getItem("playlist-page-theme").replace(/"/g, '');
+let currTheme = localStorage.getItem("playlist-page-theme")?.replace(/"/g, '') || "light";
 const themeStyles = {
     light: {
         containerBg: "#ffffff",
