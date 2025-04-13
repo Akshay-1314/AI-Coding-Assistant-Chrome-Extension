@@ -1,130 +1,120 @@
 # AI Help Chrome Extension
 
-This Chrome extension is designed to provide AI assistance for solving coding problems directly within the browser. It uses the Google Gemini AI model to offer guidance, solutions, and code examples. The extension integrates with a website hosting coding problems, allowing users to easily get help via a chatbot interface.
+A powerful Chrome extension that provides AI-powered assistance for solving coding problems directly in your browser. Leveraging Google Gemini AI, this tool offers intelligent guidance, solutions, and code examples through a seamless chatbot interface.
 
----
+![AI Help Extension Banner](https://via.placeholder.com/800x200?text=AI+Help+Chrome+Extension)
 
-## Features
+## ✨ Features
 
-- **AI Help Button**: Adds an "AI Help" button to coding problem pages. This button opens a chatbot that assists with solving problems, providing hints, and answering related queries.
-- **Custom API Key**: Users enter their API key for the AI model via the extension's popup interface. Once entered, the chatbot fetches AI responses using this key.
-- **User-friendly UI**: Sleek, modern, and responsive popup and chatbot interfaces with pleasant user interactions.
-- **Message History**: Chat history is saved and used to provide contextual information to the AI model.
-- **Clear Chat History**: A dedicated button to clear the chat history directly from the chatbot interface, with smooth UI feedback to confirm the action.
-- **Input/Output Formatting**: Collects information from the page, including problem descriptions, hints, input/output formats, and constraints, and sends it to the AI for processing.
-- **User's Code as Context**: The user's current code, based on the selected language, is included in the prompt sent to the AI to provide relevant code-specific context and suggestions.
-- **Theme Change**: The chatbot's theme can now be dynamically changed based on the selected page theme. This feature allows the extension to match the look and feel of the host website by adjusting the UI colors (container background, header, buttons, etc.) based on the active theme.
+- **🤖 AI-Powered Assistance**: Get intelligent help with coding problems through an intuitive chatbot interface
+- **🔑 Custom API Integration**: Securely connect with your own Google Gemini API key
+- **📱 Responsive Design**: Enjoy a modern, sleek interface that works across different screen sizes
+- **💬 Contextual Conversations**: Benefit from persistent chat history for more relevant assistance
+- **🧹 Easy Reset**: Clear your conversation history with one click
+- **📋 Smart Context Collection**: Automatically gathers problem descriptions, hints, constraints, and your code to provide targeted help
+- **🎨 Dynamic Theming**: Experience a UI that adapts to match the host website's theme for a cohesive look and feel
 
----
-
-## Installation
+## 🚀 Installation
 
 ### Prerequisites
 
-1. **Chrome Browser**: The extension is built for Chrome, so you will need the Chrome browser installed.
-2. **API Key**: Obtain an API key from the Google Gemini API.
+- Google Chrome browser
+- Google Gemini API key ([Get one here](https://ai.google.dev/))
 
-### Steps to Install
+### Quick Install
 
-1. Clone the repository or download the source files.
-2. Open Chrome and navigate to `chrome://extensions/`.
-3. Enable "Developer Mode" in the top-right corner.
-4. Click "Load unpacked" and select the folder containing the extension files.
-5. The extension should now appear in your browser's extension bar.
+1. **Download the Extension**
+   ```
+   git clone https://github.com/yourusername/ai-help-extension.git
+   ```
+   
+2. **Load in Chrome**
+   - Navigate to `chrome://extensions/`
+   - Enable "Developer Mode" (toggle in top-right)
+   - Click "Load unpacked"
+   - Select the extension directory
 
----
+3. **Set Up Your API Key**
+   - Click the AI Help icon in your browser toolbar
+   - Enter your Google Gemini API key when prompted
+   - You're ready to go!
 
-## Usage
+## 🔍 How to Use
 
-### Set the API Key
+### Getting Started
 
-1. After installing the extension, click on the **AI Help** icon while viewing the coding problem page in your browser.
-2. A popup to enter your API key will appear.
-3. Enter your API key in the popup to enable the AI model.
-4. The popup will automatically close, and the chatbot will be ready for use.
+1. **Navigate** to any supported coding problem page
+2. **Click** the "AI Help" button that appears on the page
+3. **Start chatting** with the AI assistant about your coding problem
 
-### Open AI Help
+### Effective Interactions
 
-1. When viewing a coding problem page, an **AI Help** button will appear on the page.
-2. Click the button to open the chatbot, which assists with the problem by providing hints, explanations, or code suggestions.
+- Ask specific questions about the problem
+- Request explanations for complex concepts
+- Get hints without full solutions
+- Ask for optimization tips for your existing code
 
-### Interacting with the Chatbot
+### Managing Your Experience
 
-- Ask specific questions or provide input related to the problem. The AI will respond accordingly.
-- The AI will act as a helpful assistant tasked with providing guidance on problem-specific queries.
+- **Theme Adaptation**: The chatbot automatically matches the website's theme
+- **Clear History**: Use the button in the chatbot header to reset your conversation
+- **Update API Key**: Click the extension icon in your toolbar to change your API key
 
-### Clear Chat History
+## 🔧 Technical Architecture
 
-- Click the **Clear History** button in the chatbot header to delete all past messages.
-- A smooth animation and UI feedback will confirm that the chat history has been cleared successfully.
+### Component Overview
 
-### Theme Change
+```
+├── manifest.json         # Extension configuration
+├── background.js         # Background processes and message handling
+├── content.js            # Page integration and chatbot UI
+├── popup.html            # API key entry interface
+├── popup.js              # Popup logic and storage management
+└── styles/               # CSS for extension components
+```
 
-- The chatbot interface will automatically match the theme of the hosting page. When the page theme is updated (such as through a theme switcher), the chatbot’s appearance will change accordingly.
-- The theme color adjustments include background colors, button styles, text color, and more, ensuring the chatbot aligns with the site's overall design.
+### Core Functionality
 
----
+- **Message Passing System**: Enables communication between extension components
+- **Context Collection**: Gathers relevant problem information from the page
+- **Theme Detection**: Monitors and adapts to website theme changes
+- **Secure Storage**: Safely stores API key in Chrome's local storage
 
-## Features and Flow
+## 🔐 Privacy & Security
 
-### AI Help Button
+- Your API key is stored locally on your device
+- Code and problem data never leave your browser except when sent directly to the Google Gemini API
+- No tracking or analytics are implemented in this extension
 
-- Adds an **AI Help** button to coding problem pages.
-- Opens a chatbot that assists with problem-solving.
-- If no API key is set, the popup prompts the user to input the key.
+## 🛠️ Development Roadmap
 
-### Popup (API Key Entry)
+- [ ] Support for additional AI models beyond Google Gemini
+- [ ] Code execution and testing capabilities
+- [ ] Customizable AI behavior and persona
+- [ ] Offline mode with cached responses for common questions
+- [ ] Advanced syntax highlighting in code snippets
 
-- Prompts the user to enter an API key if none is set.
-- Saves the API key to `chrome.storage.local` for future use.
-- Automatically enables the chatbot after the key is entered.
+## 🤝 Contributing
 
-### Chatbot UI
+Contributions are welcome! To contribute:
 
-- Modern, responsive, and user-friendly interface.
-- Features a **Clear History** button for resetting the chat, ensuring a clutter-free experience.
-- **Dynamic Theme Switching**: The chatbot theme can change based on the active theme of the page being viewed.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### Message Passing
+## 📄 License
 
-- The extension uses message passing between scripts (`popup.js`, `background.js`, `content.js`) to handle user input and response flow.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
----
+## 📞 Contact and Support
 
-## Code Structure
+For questions, support requests, or collaboration opportunities, please reach out through:
 
-1. **background.js**
-   - Manages background tasks, including listening for messages and handling chatbot interactions.
-   - Sends messages to the content script to open the chatbot.
-
-2. **content.js**
-   - Handles the chatbot functionality on the webpage.
-   - Receives messages from the background script to open the chatbot UI.
-
-3. **popup.html**
-   - Interface for entering the API key.
-   - Displays a form for users to input their API key, which is stored in `chrome.storage.local`.
-
-4. **popup.js**
-   - Logic for saving the API key, interacting with `chrome.storage.local`, and closing the popup.
-
----
-
-## Permissions
-
-- **`storage`**: To store the API key in Chrome's local storage.
-- **`activeTab`**: To interact with the active tab where the coding problem is displayed.
-
----
-
-## Future Improvements
-
-- **Multiple AI Model Support**: Allow users to choose between different AI models.
-- **Better Error Handling**: Improve error handling for unavailable AI models or invalid API keys.
-- **Enhanced UI**: Further enhance chatbot and popup interfaces for a more engaging experience.
+- [GitHub Issues](https://github.com/Akshay-1314/whiteboard-stack/issues) for bug reports and feature requests
+- Contact [Akshay Kumar Malathkar](https://github.com/Akshay-1314) for direct communication
 
 ---
 
-## Contributing
-
-Feel free to fork the repository and contribute to its development! If you find any bugs or have feature suggestions, please create an issue or submit a pull request.
+Made with ❤️ by Akshay Kumar Malathkar
